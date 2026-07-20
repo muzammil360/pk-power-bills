@@ -1,0 +1,13 @@
+{
+  "name": "mepco-bill-downloader",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Batch-download MEPCO electricity bills as PDFs, given a CSV of consumer numbers.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js --input consumers.csv --output ./bills"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
