@@ -1,6 +1,6 @@
-# MEPCO Bill Downloader
+# pk-power-bills
 
-Batch-downloads MEPCO (bill.pitc.com.pk) electricity bills as PDFs, given a CSV of consumer numbers.
+Batch-downloads power (bill.pitc.com.pk) bills as PDFs, given a CSV of consumer numbers.
 
 ## Setup
 
@@ -30,16 +30,6 @@ node main.js --input consumers.csv --output ./bills
 
 PDFs are written as `<output>/<YYYY-MM>-<name>.pdf`, where the year/month
 come from the bill's own "Bill Month" field (not the run date).
-
-## Running on a server (cron)
-
-Don't run `--with-deps` on a bare host — it `apt-get`-installs OS libraries
-system-wide. Run inside the official Playwright Docker image instead:
-
-```
-docker run --rm -v "$PWD":/app -w /app mcr.microsoft.com/playwright:v1.48.0-jammy \
-  sh -c "npm install && node main.js --input consumers.csv --output ./bills"
-```
 
 ## Notes
 
