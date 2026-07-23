@@ -38,6 +38,7 @@ function parseCsv(filePath) {
   const customerIdIdx = header.indexOf('consumerid');
   const nameIdx = header.indexOf('name');
   const discoIdx = header.indexOf('disco');
+  const refnoIdx = header.indexOf('refno');
   if (customerIdIdx === -1 || nameIdx === -1) {
     throw new Error('CSV header must include "consumerid" and "name" columns');
   }
@@ -53,7 +54,8 @@ function parseCsv(filePath) {
     if (!/^[a-z]+$/.test(disco)) {
       throw new Error(`Row ${i + 2}: invalid disco "${disco}" (letters only, e.g. "mepco", "iesco")`);
     }
-    return { customerId, name, disco };
+    const refno = (refnoIdx !== -1 && cols[refnoIdx]) || null;
+    return { customerId, name, disco, refno };
   });
 }
 
@@ -91,22 +93,25 @@ async function getBillYearMonth(page) {
   return null;
 }
 
-async function loadBillViaSearchForm(page, customerId, disco) {
+async function loadBillViaSearchForm(page, customerId, disco, refno) {
+  const searchMode = refno ? 'refno' : 'appno';
+  const searchValue = refno || customerId;
+
   await page.goto(`${ORIGIN}/${disco}bill`, { waitUntil: 'networkidle' });
-  await page.locator('input[name="rbSearchByList"][value="appno"]').check();
-  await page.locator('input[name="searchTextBox"]').fill(customerId);
+  await page.locator(`input[name="rbSearchByList"][value="${searchMode}"]`).check();
+  await page.locator('input[name="searchTextBox"]').fill(searchValue);
   await Promise.all([
-    page.waitForURL(`**/${disco}bill/general?appno=*`),
+    page.waitForURL(`**/${disco}bill/general?${searchMode}=*`),
     page.locator('input[name="btnSearch"]').click(),
   ]);
   await page.waitForLoadState('networkidle');
   return isValidBillPage(page);
 }
 
-async function downloadBillPdf(browser, { customerId, name, disco }, outputDir) {
+async function downloadBillPdf(browser, { customerId, name, disco, refno }, outputDir) {
   const page = await browser.newPage();
   try {
-    const ok = await loadBillViaSearchForm(page, customerId, disco);
+    const ok = await loadBillViaSearchForm(page, customerId, disco, refno);
     if (!ok) {
       throw new Error('Bill page did not load valid bill content');
     }

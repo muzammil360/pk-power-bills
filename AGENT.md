@@ -20,6 +20,21 @@ have **not** been confirmed against a real IESCO bill — no real IESCO
 consumer ID was available to test end-to-end. If adding another DISCO or
 debugging an IESCO failure, verify this first.
 
+**LESCO status**: confirmed end-to-end with a real bill. Field names match
+mepco/iesco, but two things differ:
+- **The `appno` (Customer ID) mode expects an 11-digit ID** (the form's
+  placeholder text says so live), not ~10 like mepco/iesco. A real LESCO
+  bill can have a *7-digit* consumer number (confirmed: the bill's own
+  "CONSUMER ID" field showed a 7-digit value) — that number will never
+  work in `appno` search on LESCO's site. Use `refno` (14-digit reference
+  number, printed on the bill) instead for these; that's what the optional
+  `refno` CSV column and `loadBillViaSearchForm`'s `searchMode` param are
+  for.
+- The LESCO form has an **extra field, `ruCodeTextBox`**, a `U`/`R`
+  (urban/rural?) select not present on mepco/iesco. Left at its default
+  (`U`, empty value) for the confirmed working refno search — untested
+  whether it matters for other consumers/modes.
+
 ## Site behavior — things that aren't obvious from the site itself
 
 - **Direct GET to `/{disco}bill/general?appno={id}` does not work.** It
