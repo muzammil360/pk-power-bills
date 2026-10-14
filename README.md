@@ -34,7 +34,7 @@ resolve there and you'll need the reference number from the bill instead.
 node main.js --input consumers.csv --output ./bills
 ```
 
-PDFs are written as `<output>/<YYYY-MM>-<name>.pdf`, where the year/month
+PDFs are written as `<output>/<name>-<YYYY-MM>.pdf`, where the year/month
 come from the bill's own "Bill Month" field (not the run date).
 
 ## Notes

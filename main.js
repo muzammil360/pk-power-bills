@@ -121,7 +121,7 @@ async function downloadBillPdf(browser, { customerId, name, disco, refno }, outp
       throw new Error('Could not read "Bill Month" from the bill page');
     }
 
-    const fileName = `${billYearMonth.year}-${billYearMonth.month}-${sanitizeFilename(name)}.pdf`;
+    const fileName = `${sanitizeFilename(name)}-${billYearMonth.year}-${billYearMonth.month}.pdf`;
     const outPath = path.join(outputDir, fileName);
     await page.pdf({ path: outPath, format: 'A4', printBackground: true });
     return { customerId, name, disco, ok: true, outPath };
