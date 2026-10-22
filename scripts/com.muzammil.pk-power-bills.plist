@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.muzammil.pk-power-bills</string>
+
+    <!-- caffeinate -i holds an idle-sleep assertion so the Mac doesn't drop
+         to sleep mid-download (a run takes ~30s). The rest is a plain
+         invocation of the script - no wrapper, no shell. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/caffeinate</string>
+        <string>-i</string>
+        <string>/Users/muzammil/.nvm/versions/node/v26.10.0/bin/node</string>
+        <string>/Users/muzammil/git/pk-power-bills/main.js</string>
+        <string>--input</string>
+        <string>/Users/muzammil/git/pk-power-bills/consumers.csv</string>
+        <string>--output</string>
+        <string>/Users/muzammil/git/pk-power-bills/bills</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/muzammil/git/pk-power-bills</string>
+
+    <!-- Friday at 18:00. If the Mac is asleep at that time, launchd runs the
+         job on the next wake instead of skipping it. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>5</integer>
+        <key>Hour</key>
+        <integer>18</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Also run whenever the agent loads (login after a restart/shutdown, or
+         install), to catch up on runs missed while the Mac was off. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/muzammil/git/pk-power-bills/logs/weekly.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/muzammil/git/pk-power-bills/logs/weekly.log</string>
+</dict>
+</plist>

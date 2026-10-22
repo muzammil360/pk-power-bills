@@ -35,6 +35,24 @@ mepco/iesco, but two things differ:
   (`U`, empty value) for the confirmed working refno search — untested
   whether it matters for other consumers/modes.
 
+## Scheduling
+
+macOS weekly scheduling is a `launchd` user agent
+(`scripts/com.muzammil.pk-power-bills.plist`, installed into
+`~/Library/LaunchAgents/`). Details and commands are in README.md.
+
+Two environment quirks worth preserving:
+- **The plist calls node by absolute path.** `launchd` gives jobs a minimal
+  `PATH` and no shell profile, so a bare `node` won't resolve. The path is
+  pinned to a specific nvm version (`v26.10.0`). There is deliberately **no
+  wrapper script** — the user asked for none, and the plist can do everything
+  a wrapper would (cwd via `WorkingDirectory`, sleep hold via `caffeinate -i`).
+  If you change how the job is invoked, keep it shell-free.
+- **launchd doesn't expand `~` in plist values** — a `~/.nvm/...` node path
+  fails to spawn with exit code 78 (`EX_CONFIG`). Write paths out in full.
+- **Homebrew's node on this machine is broken** (missing `libllhttp` dylib).
+  Don't point the plist at `/opt/homebrew/bin/node`.
+
 ## Site behavior — things that aren't obvious from the site itself
 
 - **Direct GET to `/{disco}bill/general?appno={id}` does not work.** It

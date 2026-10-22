@@ -123,8 +123,11 @@ async function downloadBillPdf(browser, { customerId, name, disco, refno }, outp
 
     const fileName = `${sanitizeFilename(name)}-${billYearMonth.year}-${billYearMonth.month}.pdf`;
     const outPath = path.join(outputDir, fileName);
+    if (fs.existsSync(outPath)) {
+      return { customerId, name, disco, ok: true, skipped: true, outPath };
+    }
     await page.pdf({ path: outPath, format: 'A4', printBackground: true });
-    return { customerId, name, disco, ok: true, outPath };
+    return { customerId, name, disco, ok: true, skipped: false, outPath };
   } finally {
     await page.close();
   }
@@ -134,6 +137,7 @@ async function main() {
   const { input, output } = parseArgs(process.argv.slice(2));
   const consumers = parseCsv(input);
   fs.mkdirSync(output, { recursive: true });
+  console.log(`Run started ${new Date().toISOString()}`);
 
   const browser = await chromium.launch({ headless: true });
   const results = [];
@@ -147,7 +151,8 @@ async function main() {
         try {
           const result = await downloadBillPdf(browser, consumer, output);
           results.push(result);
-          console.log(`OK   ${consumer.customerId} (${consumer.name}, ${consumer.disco}) -> ${result.outPath}`);
+          const tag = result.skipped ? 'SKIP' : 'OK  ';
+          console.log(`${tag} ${consumer.customerId} (${consumer.name}, ${consumer.disco}) -> ${result.outPath}`);
           success = true;
         } catch (err) {
           lastError = err;
@@ -168,11 +173,13 @@ async function main() {
     await browser.close();
   }
 
-  const succeeded = results.filter((r) => r.ok);
+  const succeeded = results.filter((r) => r.ok && !r.skipped);
+  const skipped = results.filter((r) => r.skipped);
   const failed = results.filter((r) => !r.ok);
 
   console.log('\nSummary:');
   console.log(`  Succeeded: ${succeeded.length}`);
+  console.log(`  Skipped:   ${skipped.length} (already on disk)`);
   console.log(`  Failed:    ${failed.length}`);
   if (failed.length > 0) {
     console.log('  Failed consumer IDs:', failed.map((r) => r.customerId).join(', '));

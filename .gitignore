@@ -4,3 +4,5 @@ consumers.csv
 *.pdf
 .DS_Store
 EXPERIENCE.md
+logs/*
+!logs/.gitkeep
